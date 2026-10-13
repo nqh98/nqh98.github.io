@@ -1,0 +1,4 @@
+node_modules
+dist
+# LaTeX CV source, kept out of the public repo
+autoCV
