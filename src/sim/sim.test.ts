@@ -3,6 +3,7 @@ import { Pipeline } from './pipeline'
 import { OPENING_BALANCE, race } from './lostUpdate'
 import { stampede } from './cache'
 import { dispatch } from './ordering'
+import { runFlow } from './flowLock'
 import { cron, flood } from './sharding'
 
 function drain(p: Pipeline) {
@@ -118,5 +119,21 @@ describe('noisy neighbour', () => {
     const run = flood('priority')
     expect(run.delayedUsers).toBe(0)
     expect(run.waits).toHaveLength(8)
+  })
+})
+
+describe('flow lock across pods', () => {
+  it('charges once per submission without a lock', () => {
+    expect(runFlow('none').charges).toBe(4)
+  })
+
+  it('still charges once per pod with an in-process lock', () => {
+    expect(runFlow('local').charges).toBe(3)
+  })
+
+  it('charges exactly once with a lock shared by every pod', () => {
+    const run = runFlow('redis')
+    expect(run.charges).toBe(1)
+    expect(run.attempts.filter((a) => a.start > a.arrive)).toHaveLength(3)
   })
 })

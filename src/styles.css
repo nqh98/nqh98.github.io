@@ -722,6 +722,37 @@ h2 {
   overflow: hidden;
 }
 
+.gantt-wait {
+  background: var(--pending);
+  color: var(--ink);
+}
+
+.gantt-skip {
+  background: var(--posted);
+  min-width: 6px;
+}
+
+.gantt-labelled {
+  min-height: 0;
+}
+
+.gantt-line {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.gantt-label {
+  font-family: var(--figures);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.lab-summary-tall {
+  min-height: 6.4em;
+}
+
 .gantt-late {
   background: var(--margin-red);
 }
