@@ -53,8 +53,9 @@ export interface Flood {
 
 function laneFor(user: string, bot: boolean, keying: Keying): number {
   if (keying === 'user') return hashKey(user) % LANES
-  // Key = priority + user. Accounts over the rate threshold are tagged bulk
-  // and get the last lane; everyone else hashes across the rest.
+  // Key = priority + user, read by a custom partitioner. Accounts over the
+  // rate threshold are tagged bulk and get the last lane; everyone else
+  // hashes across the rest.
   return bot ? LANES - 1 : hashKey(user) % (LANES - 1)
 }
 

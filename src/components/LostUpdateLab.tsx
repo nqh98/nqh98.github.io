@@ -30,7 +30,7 @@ export function LostUpdateLab() {
         <h3>Two withdrawals, one account</h3>
         <p>
           The account holds 100. One transaction withdraws 70 while another withdraws 50. Only one
-          of them can be allowed.
+          of them can be allowed. Get it wrong and the race condition ends in a lost update.
         </p>
       </div>
 

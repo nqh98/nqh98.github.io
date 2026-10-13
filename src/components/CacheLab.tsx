@@ -47,7 +47,8 @@ export function CacheLab() {
         <h3>A hot key expires</h3>
         <p>
           {REQUESTS} requests ask for the same exchange rate in the instant its cache entry runs
-          out. What reaches the database depends on one lock.
+          out. This is cache breakdown, also called a cache stampede. What reaches the database
+          depends on one lock.
         </p>
       </div>
 

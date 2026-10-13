@@ -45,6 +45,11 @@ export function FlowLockLab() {
           balancer spreads them over three pods. Each runs the same flow: read the status, call the
           payment provider, save the result.
         </p>
+        <p>
+          A lock can expire while the provider is slow, so it is not the only guard. The status
+          check stops copies that arrive late, and the provider call carries the withdrawal ID as an
+          idempotency key.
+        </p>
       </div>
 
       <div className="segmented" role="radiogroup" aria-label="Where the lock lives">

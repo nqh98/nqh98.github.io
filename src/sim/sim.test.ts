@@ -20,6 +20,20 @@ describe('pipeline', () => {
     expect(p.lost('notify')).toBe(0)
   })
 
+  it('keeps every payment of one account in one partition', () => {
+    const p = new Pipeline()
+    p.send(60)
+    drain(p)
+    const home = new Map<number, number>()
+    p.partitions.forEach((log, partition) => {
+      for (const message of log) {
+        expect(home.get(message.account) ?? partition).toBe(partition)
+        home.set(message.account, partition)
+      }
+    })
+    expect(new Set(home.values()).size).toBe(3)
+  })
+
   it('drops redelivered messages instead of processing them twice', () => {
     const p = new Pipeline()
     p.send(10)

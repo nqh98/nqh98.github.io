@@ -40,8 +40,9 @@ export function OrderingLab() {
       <div className="lab-head">
         <h3>One consumer, four threads, still in order</h3>
         <p>
-          A partition holds three events each for users A to F. One consumer must go faster than a
-          single thread without ever applying a user’s events out of order.
+          A partition holds three events each for users A to F. Adding partitions and consumer
+          instances is the first lever. This is for when one consumer still has to go faster than a
+          single thread, without ever applying a user’s events out of order.
         </p>
       </div>
 

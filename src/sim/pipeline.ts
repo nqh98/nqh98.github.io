@@ -3,6 +3,7 @@
 // own pace. Deliberately deterministic so the page and the tests agree.
 
 export const PARTITIONS = 3
+const ACCOUNTS = 7
 const RELAY_RATE = 4
 const CONSUMER_RATE = 3
 
@@ -10,6 +11,7 @@ export type ConsumerName = 'notify' | 'report'
 
 export interface Message {
   id: number
+  account: number
   duplicate: boolean
 }
 
@@ -35,7 +37,7 @@ export class Pipeline {
     report: newConsumer(),
   }
   private nextId = 1
-  private published: { id: number; partition: number }[] = []
+  private published: { id: number; account: number; partition: number }[] = []
 
   /** One DB transaction per payment: the ledger row and its outbox row commit together. */
   send(count = 1): FlowEvent[] {
@@ -48,11 +50,11 @@ export class Pipeline {
     return events
   }
 
-  /** The broker (or a relay that crashed before marking rows sent) delivers messages again. */
+  /** The relay crashed after publishing but before marking its rows sent, so it publishes them again. */
   redeliver(count: number): number {
     const again = this.published.slice(-count)
-    for (const { id, partition } of again) {
-      this.partitions[partition].push({ id, duplicate: true })
+    for (const { id, account, partition } of again) {
+      this.partitions[partition].push({ id, account, duplicate: true })
     }
     return again.length
   }
@@ -65,10 +67,11 @@ export class Pipeline {
     const events: FlowEvent[] = []
 
     for (const id of this.outbox.splice(0, RELAY_RATE)) {
-      // Partition by key so one account's payments stay ordered.
-      const partition = id % PARTITIONS
-      this.partitions[partition].push({ id, duplicate: false })
-      this.published.push({ id, partition })
+      // The account is the partition key, so one account's payments stay ordered.
+      const account = (id * 5) % ACCOUNTS
+      const partition = account % PARTITIONS
+      this.partitions[partition].push({ id, account, duplicate: false })
+      this.published.push({ id, account, partition })
       events.push({ type: 'published', partition })
     }
 
@@ -76,11 +79,15 @@ export class Pipeline {
       const consumer = this.consumers[name]
       if (!consumer.running) continue
       let budget = CONSUMER_RATE
-      for (let p = 0; p < PARTITIONS && budget > 0; p++) {
-        const log = this.partitions[p]
-        while (budget > 0 && consumer.offsets[p] < log.length) {
+      // Take one message per partition in turn so a busy partition cannot starve the others.
+      for (let progressed = true; budget > 0 && progressed; ) {
+        progressed = false
+        for (let p = 0; p < PARTITIONS && budget > 0; p++) {
+          const log = this.partitions[p]
+          if (consumer.offsets[p] >= log.length) continue
           const message = log[consumer.offsets[p]++]
           budget--
+          progressed = true
           const duplicate = consumer.processed.has(message.id)
           if (duplicate) {
             consumer.dropped++

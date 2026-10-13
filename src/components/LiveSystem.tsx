@@ -141,7 +141,7 @@ export function LiveSystem() {
     redraw((n) => n + 1)
     setNote(
       count
-        ? `${count} messages delivered a second time. Each consumer recognises the payment ID and drops the copy.`
+        ? `The relay crashed before marking ${count} outbox rows as sent, so it published them again. Each consumer recognises the payment ID and drops the copy.`
         : 'Nothing has been published yet. Send a payment first.',
     )
   }
@@ -162,7 +162,7 @@ export function LiveSystem() {
           {notifyOn ? 'Stop notification service' : 'Start notification service'}
         </button>
         <button type="button" onClick={redeliver}>
-          Redeliver last 5 messages
+          Publish last 5 again
         </button>
       </div>
 
@@ -172,7 +172,7 @@ export function LiveSystem() {
 
       <p className="system-hint">Swipe the diagram sideways to follow a payment to the consumers.</p>
       <div className="system-scroll" tabIndex={0} role="group" aria-label="Payment pipeline diagram">
-        <svg viewBox="0 36 960 336" className="system-svg" role="img" aria-label="Payments flow from the API gateway to the payment service, into PostgreSQL, through an outbox relay to a three-partition Kafka topic, and on to the notification and reporting services.">
+        <svg viewBox="0 36 960 336" className="system-svg" role="img" aria-label="Payments flow from the API gateway to the payment service, into PostgreSQL, through an outbox relay to a three-partition Kafka topic keyed by account, and on to the notification and reporting services.">
           <g className="edges">
             <line x1={NODE.client.x + 62} y1={166} x2={NODE.gateway.x - 62} y2={166} />
             <line x1={NODE.gateway.x + 62} y1={166} x2={NODE.payment.x - 62} y2={166} />
@@ -198,7 +198,7 @@ export function LiveSystem() {
           <Box at={NODE.report} title="Reporting" sub={`lag ${p.lag('report')}`} />
 
           <text x={LANE_X} y={58} className="lane-heading">
-            Kafka topic: payments
+            Kafka topic: payments, key = account
           </text>
           {Array.from({ length: PARTITIONS }, (_, part) => {
             const log = p.partitions[part]
@@ -271,7 +271,7 @@ export function LiveSystem() {
           <span className="swatch swatch-done" /> processed by both
         </li>
         <li>
-          <span className="swatch swatch-dup" /> redelivered copy
+          <span className="swatch swatch-dup" /> duplicate copy
         </li>
       </ul>
     </div>

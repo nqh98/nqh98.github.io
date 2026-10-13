@@ -37,8 +37,8 @@ export default function App() {
             trade systems that stay correct when requests retry, race and crash.
           </p>
           <p className="hero-invite">
-            Below is the kind of payment pipeline I built in fintech, running in your browser. Try
-            to make it lose a payment.
+            Below is the kind of payment pipeline I built in fintech, running in your browser: a
+            Transactional Outbox, Kafka, and idempotent consumers. Try to make it lose a payment.
           </p>
           <LiveSystem />
         </section>

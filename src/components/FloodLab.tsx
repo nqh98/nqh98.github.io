@@ -38,7 +38,7 @@ export function FloodLab() {
       <p className="lab-summary">
         {keying === 'user'
           ? 'Hashing the user ID keeps each user ordered, but whoever hashes next to the bot is stuck behind its backlog.'
-          : 'Accounts over a rate threshold are tagged bulk and keyed into their own partition. Everyone else still hashes by user, so ordering is unchanged.'}
+          : 'Accounts over a rate threshold are tagged bulk. A custom partitioner reads the priority from the key: bulk goes to a reserved partition, everyone else still hashes by user across the rest. Per-user ordering is unchanged.'}
       </p>
 
       <div className="flood" aria-hidden="true">
@@ -69,7 +69,9 @@ export function FloodLab() {
           <p className={run.delayedUsers ? 'verdict verdict-bad' : 'verdict verdict-good'} role="status">
             {run.delayedUsers
               ? `${run.delayedUsers} of ${run.waits.length} ordinary users shared the bot’s partition and waited up to ${run.worstNormalWaitMs.toLocaleString('en')} ms. They did nothing wrong.`
-              : `No ordinary user waited more than ${run.worstNormalWaitMs} ms. The bot’s backlog only delays the bot.`}
+              : run.worstNormalWaitMs === 0
+                ? 'No ordinary user waited at all. The bot’s backlog only delays the bot.'
+                : `No ordinary user waited more than ${run.worstNormalWaitMs} ms. The bot’s backlog only delays the bot.`}
           </p>
         )}
       </div>

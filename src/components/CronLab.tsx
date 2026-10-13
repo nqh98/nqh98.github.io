@@ -25,7 +25,7 @@ export function CronLab() {
       </div>
       <p className="lab-summary">
         {sharded
-          ? 'Each instance only takes the users whose hash maps to it. No lock, no coordination, and the split survives restarts.'
+          ? 'Each instance knows its own index and the instance count, and only takes the users whose hash maps to it. No lock is needed. Changing the count moves users between instances, so the job itself stays idempotent.'
           : 'All three instances run the same query and all three send.'}
       </p>
 
