@@ -17,6 +17,7 @@ export interface Plan {
   /** cells[shard][month]: 'hit' holds wanted rows, 'wasted' is in scope but holds nothing wanted, 'skipped' is pruned. */
   cells: ('hit' | 'wasted' | 'skipped')[][]
   searchedRows: number
+  /** Rows in the cells that can hold a match. An upper bound on the result, not its size. */
   wantedRows: number
   totalRows: number
   /** How many separate databases the query has to be sent to. */

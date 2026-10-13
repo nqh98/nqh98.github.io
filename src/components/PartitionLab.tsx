@@ -5,19 +5,20 @@ const LAYOUTS: { id: Layout; label: string; summary: string }[] = [
   {
     id: 'none',
     label: 'One table',
-    summary: 'Everything in one table on one database. Simple until the indexes stop fitting in memory.',
+    summary:
+      'Everything in one table on one database. Nothing can be skipped: every query walks indexes built over all 48M rows. Simple, and fine until those indexes stop fitting in memory.',
   },
   {
     id: 'user',
     label: 'Shard by user ID',
     summary:
-      'shard = hash(user_id) % 4, each shard on its own database. Fits wallets, orders and anything else where nearly every query starts from one user.',
+      'shard = hash(user_id) % 4, each shard on its own database. Fits wallets, orders and anything else where nearly every query starts from one user. The price: cross-user queries fan out to every shard, and changing the shard count means moving users.',
   },
   {
     id: 'month',
     label: 'Partition by month',
     summary:
-      'PARTITION BY RANGE (created_at) inside one database. Fits transaction logs, audit trails and notification history: queries ask for a time window, and old data leaves by dropping a partition.',
+      'PARTITION BY RANGE (created_at) inside one database. Fits transaction logs, audit trails and notification history: queries ask for a time window, and old data leaves by dropping a partition. The price: a query without the date cannot skip anything, and every unique key must include created_at.',
   },
   {
     id: 'both',
@@ -42,21 +43,26 @@ export function PartitionLab() {
   const info = LAYOUTS.find((l) => l.id === layout)!
   const asked = QUERIES.find((q) => q.id === query)!
   const exact = result.searchedRows === result.wantedRows
+  const nothingSkipped = result.searchedRows === result.totalRows
+  const where = result.databases === 1 ? 'one database' : `${result.databases} shards at once`
 
   const verdict =
     result.removal === 'drop'
-      ? `DROP PARTITION on ${result.databases === 1 ? 'one database' : `${result.databases} shards`}. ${millions(result.wantedRows)} rows leave as a metadata change, with no row-by-row delete.`
+      ? `Drop the oldest partition on ${result.databases === 1 ? 'one database' : `each of ${result.databases} shards`}. ${millions(result.wantedRows)} rows leave as a metadata change, with no row-by-row delete.`
       : result.removal === 'delete'
         ? `DELETE has to find and remove ${millions(result.wantedRows)} rows one by one inside ${millions(result.searchedRows)}, on ${result.databases === 1 ? 'one database' : `all ${result.databases} shards`}, leaving bloat behind.`
-        : `Runs against tables and indexes holding ${millions(result.searchedRows)} of ${millions(result.totalRows)} rows, on ${result.databases === 1 ? 'one database' : `${result.databases} shards at once`} to return ${millions(result.wantedRows)}.`
+        : exact
+          ? `Runs against ${millions(result.searchedRows)} of ${millions(result.totalRows)} rows on ${where}. Everything else is skipped before the query starts.`
+          : `Runs against ${millions(result.searchedRows)} of ${millions(result.totalRows)} rows on ${where}, though a match can only be in ${millions(result.wantedRows)} of them. An index has to do the rest.`
 
   return (
     <div className="lab">
       <div className="lab-head">
-        <h3>A table that outgrew one database</h3>
+        <h3>One table, 48 million rows</h3>
         <p>
-          48 million transactions: four groups of users across the last twelve months. How the table is split
-          decides how much data, and how big an index, each query runs against. Pick a layout, then ask it something.
+          Transactions for four groups of users across the last twelve months, a million rows in
+          each square. How the table is split decides how much data, and how big an index, each
+          query runs against. Pick a layout, then ask it something.
         </p>
       </div>
 
@@ -92,10 +98,10 @@ export function PartitionLab() {
       <ul className="system-legend">
         <li>rows: user groups, columns: months</li>
         <li>
-          <span className="swatch swatch-ink" /> holds wanted rows
+          <span className="swatch swatch-ink" /> can hold a match
         </li>
         <li>
-          <span className="swatch swatch-pending" /> in scope, not needed
+          <span className="swatch swatch-pending" /> in scope, cannot hold a match
         </li>
         <li>
           <span className="swatch swatch-empty" /> skipped
@@ -103,7 +109,16 @@ export function PartitionLab() {
       </ul>
 
       <div className="lab-foot">
-        <p className={exact || result.removal === 'drop' ? 'verdict verdict-good' : 'verdict verdict-bad'} role="status">
+        <p
+          className={
+            exact || result.removal === 'drop'
+              ? 'verdict verdict-good'
+              : nothingSkipped || result.removal === 'delete'
+                ? 'verdict verdict-bad'
+                : 'verdict'
+          }
+          role="status"
+        >
           {verdict}
         </p>
       </div>

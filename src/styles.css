@@ -753,6 +753,10 @@ h2 {
   min-height: 6.4em;
 }
 
+.parts ~ .lab-foot {
+  min-height: 5.6em;
+}
+
 .gantt-late {
   background: var(--margin-red);
 }
