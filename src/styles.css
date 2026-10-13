@@ -849,6 +849,60 @@ h2 {
   background: var(--ink);
 }
 
+.lab-sql {
+  margin-top: 10px;
+  min-height: 3em;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
+
+.parts {
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1.5px solid var(--ink);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.parts-row {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2px;
+}
+
+/* Gaps show where the table is physically split. */
+.parts-user,
+.parts-both {
+  gap: 10px;
+}
+
+.parts-month .parts-row,
+.parts-both .parts-row {
+  gap: 7px;
+}
+
+.part {
+  height: 26px;
+  border: 1px solid var(--rule);
+}
+
+.part-hit {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.part-wasted {
+  background: var(--pending);
+  border-color: var(--pending);
+}
+
+.swatch-empty {
+  border: 1px solid var(--rule);
+}
+
 /* ---------- work log ---------- */
 
 .log {

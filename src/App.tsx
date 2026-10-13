@@ -2,6 +2,7 @@ import { LiveSystem } from './components/LiveSystem'
 import { LostUpdateLab } from './components/LostUpdateLab'
 import { CacheLab } from './components/CacheLab'
 import { FlowLockLab } from './components/FlowLockLab'
+import { PartitionLab } from './components/PartitionLab'
 import { OrderingLab } from './components/OrderingLab'
 import { CronLab } from './components/CronLab'
 import { FloodLab } from './components/FloodLab'
@@ -44,9 +45,10 @@ export default function App() {
         </section>
 
         <section id="labs" className="sheet">
-          <h2>Six problems I get paid to prevent</h2>
+          <h2>Seven problems I get paid to prevent</h2>
           <p className="section-lede">
-            All of them pass a single-user test and only appear under concurrency or load. Solving
+            All of them pass a single-user test and only appear under concurrency, load or data
+            growth. Solving
             them was my job in fintech and in bot services. Flip the strategy and run each one.
           </p>
           <div className="labs">
@@ -55,6 +57,7 @@ export default function App() {
             <FlowLockLab />
             <OrderingLab />
             <CronLab />
+            <PartitionLab />
             <FloodLab />
           </div>
         </section>

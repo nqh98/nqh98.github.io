@@ -4,6 +4,7 @@ import { OPENING_BALANCE, race } from './lostUpdate'
 import { stampede } from './cache'
 import { dispatch } from './ordering'
 import { runFlow } from './flowLock'
+import { plan } from './partitioning'
 import { cron, flood } from './sharding'
 
 function drain(p: Pipeline) {
@@ -149,5 +150,36 @@ describe('flow lock across pods', () => {
     const run = runFlow('redis')
     expect(run.charges).toBe(1)
     expect(run.attempts.filter((a) => a.start > a.arrive)).toHaveLength(3)
+  })
+})
+
+describe('partitioning and sharding', () => {
+  it('searches everything in a single table', () => {
+    expect(plan('none', 'user').searchedRows).toBe(48_000_000)
+  })
+
+  it('sends a user query to one shard but a date query to all of them', () => {
+    expect(plan('user', 'user')).toMatchObject({ searchedRows: 12_000_000, databases: 1 })
+    expect(plan('user', 'month')).toMatchObject({ searchedRows: 48_000_000, databases: 4 })
+  })
+
+  it('prunes a date query to one partition but not a user query', () => {
+    expect(plan('month', 'month').searchedRows).toBe(4_000_000)
+    expect(plan('month', 'user').searchedRows).toBe(48_000_000)
+  })
+
+  it('touches only the wanted rows when split both ways', () => {
+    for (const query of ['user', 'month', 'userMonth', 'retention'] as const) {
+      const result = plan('both', query)
+      expect(result.searchedRows).toBe(result.wantedRows)
+    }
+    expect(plan('both', 'userMonth').searchedRows).toBe(1_000_000)
+  })
+
+  it('drops a partition for retention only when split by month', () => {
+    expect(plan('month', 'retention').removal).toBe('drop')
+    expect(plan('both', 'retention').removal).toBe('drop')
+    expect(plan('user', 'retention').removal).toBe('delete')
+    expect(plan('none', 'retention').removal).toBe('delete')
   })
 })

@@ -135,7 +135,7 @@ export const skills: { area: string; tools: string; proof: string }[] = [
   },
   {
     area: 'Data and caching',
-    tools: 'PostgreSQL, MySQL, MongoDB, ArangoDB, Redis',
+    tools: 'PostgreSQL, MySQL, MongoDB, ArangoDB, Redis; table partitioning by date, sharding by user ID',
     proof: 'Query tuning, hot-key caching, schema design',
   },
   {
