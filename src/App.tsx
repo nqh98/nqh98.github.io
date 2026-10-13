@@ -144,8 +144,7 @@ export default function App() {
 
       <footer className="foot">
         <p>
-          {profile.name}, {profile.location}. Every number on this page is computed by code you can
-          read in the source.
+          {profile.name}, {profile.location}.
         </p>
       </footer>
     </>
