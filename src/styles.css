@@ -184,8 +184,24 @@ h2 {
   line-height: 1.35;
 }
 
+.hero-actions {
+  margin-top: 24px;
+}
+
+a.primary {
+  display: inline-block;
+  text-decoration: none;
+}
+
+a.primary:hover {
+  color: var(--sheet);
+  background: var(--margin-red);
+  border-color: var(--margin-red);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
 .hero-invite {
-  margin-top: 16px;
+  margin-top: 28px;
   max-width: 56ch;
   color: var(--ink-soft);
 }

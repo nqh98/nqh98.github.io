@@ -4,6 +4,7 @@ export const profile = {
   location: 'Ho Chi Minh City, Vietnam',
   email: 'huynguyen080898@gmail.com',
   linkedin: 'https://www.linkedin.com/in/huynq-771988166',
+  cv: './HuyNQ-SoftwareEngineer-CV.pdf',
 }
 
 export interface Job {

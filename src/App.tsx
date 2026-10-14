@@ -37,6 +37,11 @@ export default function App() {
             Senior backend engineer in Ho Chi Minh City. For six years I have built payment and
             trade systems that stay correct when requests retry, race and crash.
           </p>
+          <p className="hero-actions">
+            <a className="primary" href={profile.cv} download>
+              Download CV (PDF)
+            </a>
+          </p>
           <p className="hero-invite">
             Below is the kind of payment pipeline I built in fintech, running in your browser: a
             Transactional Outbox, Kafka, and idempotent consumers. Try to make it lose a payment.
@@ -140,6 +145,11 @@ export default function App() {
             </li>
             <li>
               <a href={profile.linkedin}>LinkedIn</a>
+            </li>
+            <li>
+              <a href={profile.cv} download>
+                Download CV (PDF)
+              </a>
             </li>
           </ul>
         </section>
